@@ -1,0 +1,75 @@
+falling:
+
+1.if the space under the player is filled, the player stops falling
+2. otherwise the player keeps falling
+
+Detailed:
+1.
+    a. take the player's current Y position and add their height. Call this         newPosY
+    b. we need to check if newPosY is filled with a 1. Send newPosY as an
+        address to our emulated ram.
+    c. as soon as we get our answer, we check if it's a 0 or a 1:
+        I. if its a 1, we stop falling. Output a zero and done = 1.
+        II. if its a 0, we keep falling. Output a one and done = 1.
+    d. if we are still falling, we wait 300ms before we check again.
+        
+        Otherwise, we restart back to a.
+
+===
+moving left:
+
+1. check if the players moving left
+2. if the player is NOT falling
+3. check if the space to the left of the player is 1
+    a. if it is, the player doesnt move
+    b. if its not the player moves to the left by 1
+    if the player's falling, do nothing
+4. get a new value from din
+
+detailed:
+S0:
+    if ps2_done is 1
+        check_fall = 1
+        go to S1
+S1:
+    if fall_done = 1 
+        go to S2
+    otherwise wait until fall_done = 1
+S2:
+    if din is space
+        a. take the players current y position
+        b. subtract 1 from this position
+        c. take subtraction result and send it to memory
+            1. enable 'to memory' register
+        d. if the returned value is 1
+            the player cant move into that space. Do nothing
+           if the returned value is 0
+               1. latch the -1 value in the y register
+                => enable the y register
+    go back to S0
+
+    if din is left 
+        0. l_r <= 0
+        a. take the players current x position
+        b. subtract 1 from this position
+        c. take subtraction result and send it to memory
+            1. enable 'to memory' register
+        d. if the returned value is 1
+            the player cant move into that space. Do nothing
+           if the returned value is 0
+               1. latch the -1 value in the x register
+                => enable the x register
+    go back to S0
+
+    if din is right
+        0. l_r <= 1 
+        a. take the players current x position
+        b. add ( player's width + 1 ) to this position
+        c. take result and send it to memory
+            1. enable 'to memory' register
+        d. if the returned value is 1
+            the player cant move into that space. Do nothing
+           if the returned value is 0
+               1. latch the +1 value in the x register
+                => enable the x register
+    go back to S0
