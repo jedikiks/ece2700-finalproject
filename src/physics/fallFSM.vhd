@@ -9,7 +9,7 @@ entity fallFSM is
 	port ( clock, resetn: in std_logic;
 	       RAM_DO, check_fall, zQ: in std_logic;
 	       E_fallCt, posY_E, E_addr: out std_logic;
-	       falling, falling_done, sclrQ: out std_logic
+	       falling, fall_done, sclrQ: out std_logic
       	     );
 end fallFSM;
 
@@ -58,10 +58,10 @@ begin
 	Outputs: process ( y, RAM_DO, zQ )
 	begin		
 	    E_addr <= '0'; posY_E <= '0'; falling <= '0'; 	-- Default values
-	    falling_done <= '0'; E_fallCt <= '0'; sclrQ <= '0';
+	    fall_done <= '0'; E_fallCt <= '0'; sclrQ <= '0';
 		case y is			
 			when S1 => E_addr <= '1';
-				   if RAM_DO <= '1' then falling_done <= '1'; end if;
+				   if RAM_DO <= '1' then fall_done <= '1'; end if;
 			when S2 => falling <= '1';
 			    	   if zQ <= '0' then EQ <= '1';
 				   else EQ <= '1'; sclrQ <= '1'; posY_E <= '1'; E_fallCt <= '1';

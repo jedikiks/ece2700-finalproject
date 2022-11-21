@@ -11,7 +11,7 @@ entity mainFSM is
       	     );
 end mainFSM;
 
-architecture Behavioral of fallFSM is
+architecture Behavioral of mainFSM is
 	type state is ( S0, S1, S2 );
 	signal y: state;
 begin
