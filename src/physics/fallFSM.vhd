@@ -1,5 +1,9 @@
-LIBRARY ieee;
-USE ieee.std_logic_1164.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
+use ieee.math_real.log2;
+use ieee.math_real.ceil;
 
 entity fallFSM is
 	port ( clock, resetn: in std_logic;
@@ -10,15 +14,24 @@ entity fallFSM is
 end fallFSM;
 
 architecture Behavioral of fallFSM is
-	component pulseGen
-		port();
+	component my_genpulse_sclr is
+		--generic (COUNT: INTEGER:= (10**8)/2); -- (10**8)/2 cycles of T = 10 ns --> 0.5 s
+		generic (COUNT: INTEGER:= (10**2)/2); -- (10**2)/2 cycles of T = 10 ns --> 0.5us
+		port (clock, resetn, E, sclr: in std_logic;
+				Q: out std_logic_vector ( integer(ceil(log2(real(COUNT)))) - 1 downto 0);
+				z: out std_logic);
 	end component;
 
 	type state is ( S0, S1, S2 );
 	signal y: state;
 begin
-	pg: pulseGen generic map( );
-		     port map( );
+	pg: my_genpulse_sclr generic map( COUNT <= (10**2)/2 ); -- TODO: change this to non-tb value
+		     	     port map( clock <= clock,
+				       resetn <= resetn,
+				       E <= EQ,
+				       sclr <= sclrQ,
+				       z <= zQ
+				     );
 
 	Transitions: process ( resetn, clock, RAM_DO, check_fall, zQ )
 	begin
