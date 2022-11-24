@@ -7,13 +7,18 @@ use ieee.math_real.ceil;
 
 entity fallFSM is
 	port ( clock, resetn: in std_logic;
-	       RAM_DO, check_fall, zQ: in std_logic;
+	       RAM_DO, check_fall: in std_logic;
 	       E_fallCt, posY_E, E_addr: out std_logic;
 	       falling, fall_done, sclrQ: out std_logic
       	     );
 end fallFSM;
 
 architecture Behavioral of fallFSM is
+    signal zQ: std_logic;
+
+	type state is ( S0, S1, S2 );
+	signal y: state;
+
 	component my_genpulse_sclr is
 		--generic (COUNT: INTEGER:= (10**8)/2); -- (10**8)/2 cycles of T = 10 ns --> 0.5 s
 		generic (COUNT: INTEGER:= (10**2)/2); -- (10**2)/2 cycles of T = 10 ns --> 0.5us
@@ -22,15 +27,13 @@ architecture Behavioral of fallFSM is
 				z: out std_logic);
 	end component;
 
-	type state is ( S0, S1, S2 );
-	signal y: state;
 begin
-	pg: my_genpulse_sclr generic map( COUNT <= (10**2)/2 ); -- TODO: change this to non-tb value
-		     	     port map( clock <= clock,
-				       resetn <= resetn,
-				       E <= EQ,
-				       sclr <= sclrQ,
-				       z <= zQ
+	pg: my_genpulse_sclr generic map( COUNT => (10**2)/2 ) -- TODO: change this to non-tb value
+		     	     port map( clock => clock,
+				       resetn => resetn,
+				       E => EQ,
+				       sclr => sclrQ,
+				       z => zQ
 				     );
 
 	Transitions: process ( resetn, clock, RAM_DO, check_fall, zQ )
