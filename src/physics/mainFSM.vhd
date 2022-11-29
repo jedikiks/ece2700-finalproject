@@ -4,7 +4,7 @@ use ieee.std_logic_1164.all;
 entity mainFSM is
 	port ( clock, resetn: in std_logic;
 	       RAM_DO, ps2_done, fall_done, E_phy: in std_logic;
-	       din: in std_logic_vector( 8 downto 0 );	-- change this if you have bigger scan codes
+	       din: in std_logic_vector( 7 downto 0 );	-- change this if you have bigger scan codes
 	       addr_sel: out std_logic_vector( 2 downto 0 );
 	       E_jumpCt, posY_E, posX_E, E_addr: out std_logic;
 	       check_fall, l_r: out std_logic
@@ -62,7 +62,7 @@ begin
 		case y is			
 			when S0 => if ps2_done <= '1' then check_fall <= '1'; end if;
 
-            when S1 => if fall_done then 
+            when S1 => if fall_done = '1' then 
 		    		        if din <= x"23" then
                                 E_addr <= '1'; addr_sel <= "000"; 
 		    		            if RAM_DO <= '0' then posY_E <= '1';

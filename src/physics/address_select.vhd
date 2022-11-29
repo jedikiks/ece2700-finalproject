@@ -2,15 +2,15 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 entity address_select is
-	port ( fall_newPosY_addr, posY_jump_addr, newX_r_addr, newX_l_addr: in std_logic_vector( 9 downto 0 );
+	port ( fall_newPosY_addr, posY_jump_addr, newX_r_addr, newX_l_addr: in std_logic_vector( 19 downto 0 );
            addr_sel: in std_logic_vector( 2 downto 0 );
            E_addr, clock, resetn: in std_logic;
-	       addr: out std_logic_vector( 9 downto 0 ) -- change this if address width is different
+	       addr: out std_logic_vector( 19 downto 0 ) -- change this if address width is different
       	 );
 end address_select;
 
 architecture Behavioral of address_select is
-    signal D_addr: std_logic_vector( 9 downto 0 );
+    signal D_addr: std_logic_vector( 19 downto 0 );
 
 	component my_rege
 		generic (N: INTEGER:= 4);
@@ -28,7 +28,7 @@ begin
 	      		  newX_l_addr when "00",
 	    		  ( others => '-' ) when others;	
 
-	addrreg: my_rege generic map( N => 10) -- change this if bit widths for HC and VC are different
+	addrreg: my_rege generic map( N => 20) -- change this if bit widths for HC and VC are different
 	        	     port map( clock=>clock, 
                                resetn => resetn,
                                E => E_addr,

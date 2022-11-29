@@ -10,12 +10,12 @@ entity fallFSM is
 	       RAM_DO, check_fall: in std_logic;
 	       E_fallCt, posY_E, E_addr: out std_logic;
 	       falling, fall_done, sclrQ: out std_logic;
-	       addr_sel: out std_logic_vector( 3 downto 0 )
+	       addr_sel: out std_logic_vector( 2 downto 0 )
       	     );
 end fallFSM;
 
 architecture Behavioral of fallFSM is
-    signal zQ: std_logic;
+    signal zQ, sclrQ_t, EQ: std_logic;
 
 	type state is ( S0, S1, S2 );
 	signal y: state;
@@ -29,11 +29,13 @@ architecture Behavioral of fallFSM is
 	end component;
 
 begin
+    sclrQ <= sclrQ_t;
+    
 	pg: my_genpulse_sclr generic map( COUNT => (10**2)/2 ) -- TODO: change this to non-tb value
 		     	     port map( clock => clock,
 				       resetn => resetn,
 				       E => EQ,
-				       sclr => sclrQ,
+				       sclr => sclrQ_t,
 				       z => zQ
 				     );
 
