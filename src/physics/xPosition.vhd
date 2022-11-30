@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 entity xPosition is
 	port ( clock, resetn, posX_E: in std_logic;
 	       l_r: in std_logic_vector( 1 downto 0 );
-	       posY_Q: in std_logic_vector( 9 downto 0 );
+	       posY_Q, X_immediate: in std_logic_vector( 9 downto 0 );
 	       posX_Q : out std_logic_vector( 9 downto 0 );
 	       newX_r_addr, newX_l_addr: out std_logic_vector( 19 downto 0 ) -- change this if address width is different
       	 );
@@ -37,6 +37,7 @@ begin
 	with l_r select
 		posX_D <= posX_l_pm1 when "00",
 	  		      posX_r_wp1 when "01",
+	  		      X_immediate when "10",
 			      ( others => '0' ) when others;		  
 
 	posX_r <= posX_Q_t when l_r = "01" else ( others => '0' );

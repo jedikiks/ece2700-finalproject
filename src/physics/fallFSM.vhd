@@ -6,18 +6,19 @@ use ieee.math_real.log2;
 use ieee.math_real.ceil;
 
 entity fallFSM is
-	port ( clock, resetn: in std_logic;
-	       RAM_DO, check_fall: in std_logic;
-	       E_fallCt, posY_E, E_addr: out std_logic;
-	       falling, fall_done, sclrQ: out std_logic;
-	       addr_sel: out std_logic_vector( 2 downto 0 )
-      	     );
+	    port ( clock, resetn: in std_logic;
+	           RAM_DO, check_fall: in std_logic;
+	           E_fallCt, posY_E_falling, E_addr_falling: out std_logic;
+	           fall_done, sclrQ: out std_logic;
+	           falling: out std_logic_vector( 1 downto 0 );
+	           addr_sel: out std_logic_vector( 2 downto 0 )
+          	 );
 end fallFSM;
 
 architecture Behavioral of fallFSM is
     signal zQ, sclrQ_t, EQ: std_logic;
 
-	type state is ( S0, S1, S2 );
+	type state is ( S0, S1, S2, S3 );
 	signal y: state;
 
 	component my_genpulse_sclr is
@@ -31,7 +32,7 @@ architecture Behavioral of fallFSM is
 begin
     sclrQ <= sclrQ_t;
     
-	pg: my_genpulse_sclr generic map( COUNT => (10**2)/2 ) -- TODO: change this to non-tb value
+	pg: my_genpulse_sclr generic map( COUNT => 4 ) -- TODO: change this to non-tb value
 		     	     port map( clock => clock,
 				       resetn => resetn,
 				       E => EQ,
@@ -45,16 +46,17 @@ begin
 			y <= S0;
 		elsif (clock'event and clock = '1') then
 			case y is
-				when S0 =>
+				when S0 => y <= S1;
+				when S1 =>
 				    if check_fall = '1' then
-				        y <= S1;
+				        y <= S2;
 				    end if;
 
-				when S1 =>
-					if RAM_DO ='1' then y <= S0; else y <= S2; end if;
-					
 				when S2 =>
-					if zQ ='1' then y <= S1; else y <= S2; end if;
+					if RAM_DO ='1' then y <= S1; else y <= S3; end if;
+					
+				when S3 =>
+					if zQ ='1' then y <= S2; else y <= S3; end if;
                                     
                 end case;
 		end if;
@@ -63,15 +65,16 @@ begin
 	
 	Outputs: process ( y, RAM_DO, zQ )
 	begin		
-	    E_addr <= '0'; posY_E <= '0'; falling <= '0'; 	-- Default values
-	    fall_done <= '0'; E_fallCt <= '0'; sclrQ <= '0'; addr_sel <= ( others => '0' );
-		case y is			
-            when S0 => 
-			when S1 => E_addr <= '1'; addr_sel <= "011";
+	    E_addr_falling <= '0'; posY_E_falling <= '0'; falling <= "00"; EQ <= '0'; 	-- Default values
+	    fall_done <= '0'; E_fallCt <= '0'; sclrQ_t <= '0'; addr_sel <= ( others => '0' );
+		case y is	
+			when S0 => falling <= "10";
+            when S1 => 
+			when S2 => E_addr_falling <= '1'; addr_sel <= "011";
 				   if RAM_DO <= '1' then fall_done <= '1'; end if;
-			when S2 => falling <= '1';
+			when S3 => falling <= "01";
 			    	   if zQ <= '0' then EQ <= '1';
-				   else EQ <= '1'; sclrQ <= '1'; posY_E <= '1'; E_fallCt <= '1';
+				   else EQ <= '1'; sclrQ_t <= '1'; posY_E_falling <= '1'; E_fallCt <= '1';
 				   end if;
 		end case;
 	end process;

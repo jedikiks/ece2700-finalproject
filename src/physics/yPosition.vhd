@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity yPosition is
-	port ( clock, resetn, posY_E: in std_logic;
+	port ( clock, resetn, posY_E_falling, posY_E_main, posY_E_sel: in std_logic;
 	       falling: std_logic_vector( 1 downto 0 );
 	       posX_Q, Y_immediate: in std_logic_vector( 9 downto 0 );
 	       posY_Q: out std_logic_vector( 9 downto 0 );
@@ -12,6 +12,7 @@ entity yPosition is
 end yPosition;
 
 architecture Behavioral of yPosition is
+	signal posY_E: std_logic;
 	signal fall_newPosY, posY_m1, posY_D, posY_Q_t: std_logic_vector( 9 downto 0 );
 
 	component my_rege
@@ -37,6 +38,11 @@ begin
 	  		      fall_newPosY when "01",
 	  		      Y_immediate when "10",
 			      ( others => '0' ) when others;
+	
+	with posY_E_sel select
+		posY_E <= posY_E_falling when '1',
+				  posY_E_main when '0',
+				  '0' when others;
 
 	posYreg: my_rege generic map( N => 10) -- change this if bit widths for HC and VC are different
 	        	     port map( clock => clock,
