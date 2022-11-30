@@ -79,17 +79,17 @@ begin
                     end if;
 					
 				when S4 =>
-                    if RAM_DO <= '0' then y <= S5a; else y <= S1; end if;
+                    if RAM_DO = '0' then y <= S5a; else y <= S1; end if;
 
                 when S5a =>
-                    if jwait_zQ <= '1' then
-                        if jumpPx_zQ <= '1' then y <= S1;
+                    if jwait_zQ = '1' then
+                        if jumpPx_zQ = '1' then y <= S1;
                             else y <= S4;
                         end if;
                     else y <= S5a; end if;
 
                 when S5b =>
-                    if mwait_zQ <= '1' then y <= S1; else y <= S5b; end if;
+                    if mwait_zQ = '1' then y <= S1; else y <= S5b; end if;
                                     
                 end case;
 		end if;
@@ -106,7 +106,7 @@ begin
 		case y is	
 			when S0 => posY_E_main <= '1'; l_r <= "10"; posX_E <= '1';	
 			
-			when S1 => if  E_phy = '1' and ps2_done <= '1' then check_fall <= '1'; end if;
+			when S1 => if  E_phy = '1' and ps2_done = '1' then check_fall <= '1'; end if;
 						-- if E_phy <= '1' then 
 							-- if ps2_done <= '1' then 
 								-- check_fall <= '1';
@@ -115,28 +115,27 @@ begin
 
             when S2 => E_addr_sel <= '1'; posY_E_sel <= '1';
 			
-			when S3 => if din <= x"23" then
+			when S3 => if din = x"23" then
                                 E_addr_main <= '1'; addr_sel <= "00"; 
-		    		            if RAM_DO <= '0' then posX_E <= '1';
+		    		            if RAM_DO = '0' then posX_E <= '1';
 		    		            end if;
 		    		        end if;
-		    		        if din <= x"1C" then
+		    		        if din = x"1C" then
                                 E_addr_main <= '1'; addr_sel <= "01"; l_r <= "01";
-		    		            if RAM_DO <= '0' then posX_E <= '1';
+		    		            if RAM_DO = '0' then posX_E <= '1';
 		    		            end if;
 		    		        end if;
 
             when S4 => addr_sel <= "10"; E_addr_main <= '1'; 
-                       if RAM_DO <= '0' then posY_E_main <= '1'; end if;
+                       if RAM_DO = '0' then posY_E_main <= '1'; end if;
 
-            when S5a => if jwait_zQ <= '1' then jwait_EQ <= '1'; jwait_sclrQ <= '1';
-                             if jumpPx_zQ <= '1' then E_jumpCt <= '1'; jumpPx_EQ <= '1';
-                                                      jumpPX_sclrQ <= '1';
+            when S5a => if jwait_zQ = '1' then jwait_EQ <= '1'; jwait_sclrQ <= '1';
+                             if jumpPx_zQ = '1' then E_jumpCt <= '1'; jumpPx_EQ <= '1'; jumpPX_sclrQ <= '1';
                              else E_jumpCt <= '1'; jumpPx_EQ <= '1';
                              end if;
                          else jwait_EQ <= '1';
                          end if;
-            when S5b => if mwait_zQ <= '1' then mwait_EQ <= '1'; mwait_sclrQ <= '1';
+            when S5b => if mwait_zQ = '1' then mwait_EQ <= '1'; mwait_sclrQ <= '1';
                         else mwait_EQ <= '1';
                         end if;
 		end case;

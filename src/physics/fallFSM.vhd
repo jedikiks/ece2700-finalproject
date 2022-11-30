@@ -7,7 +7,7 @@ use ieee.math_real.ceil;
 
 entity fallFSM is
 	    port ( clock, resetn: in std_logic;
-	           RAM_DO, check_fall: in std_logic;
+	           RAM_DO, check_fall, E_phy: in std_logic;
 	           E_fallCt, posY_E_falling, E_addr_falling: out std_logic;
 	           fall_done, sclrQ: out std_logic;
 	           falling: out std_logic_vector( 1 downto 0 );
@@ -56,26 +56,28 @@ begin
 					if RAM_DO ='1' then y <= S1; else y <= S3; end if;
 					
 				when S3 =>
-					if zQ ='1' then y <= S2; else y <= S3; end if;
+					if E_phy = '1' and zQ ='1' then y <= S1; else y <= S3; end if;
                                     
                 end case;
 		end if;
 		
 	end process;
 	
-	Outputs: process ( y, RAM_DO, zQ )
+	Outputs: process ( y, RAM_DO, zQ, E_phy )
 	begin		
 	    E_addr_falling <= '0'; posY_E_falling <= '0'; falling <= "00"; EQ <= '0'; 	-- Default values
 	    fall_done <= '0'; E_fallCt <= '0'; sclrQ_t <= '0'; addr_sel <= ( others => '0' );
 		case y is	
 			when S0 => falling <= "10";
             when S1 => 
-			when S2 => E_addr_falling <= '1'; addr_sel <= "011";
-				   if RAM_DO <= '1' then fall_done <= '1'; end if;
+			when S2 => if RAM_DO = '1' then fall_done <= '1'; end if;
+					   E_addr_falling <= '1'; addr_sel <= "011";
 			when S3 => falling <= "01";
-			    	   if zQ <= '0' then EQ <= '1';
-				   else EQ <= '1'; sclrQ_t <= '1'; posY_E_falling <= '1'; E_fallCt <= '1';
-				   end if;
+					   if E_phy = '1' then
+							if zQ = '0' then EQ <= '1';
+								else EQ <= '1'; sclrQ_t <= '1'; posY_E_falling <= '1'; E_fallCt <= '1';
+							end if;
+						end if;
 		end case;
 	end process;
 

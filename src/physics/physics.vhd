@@ -51,7 +51,7 @@ architecture Behavioral of physics is
 
 	component fallFSM
 	    port ( clock, resetn: in std_logic;
-	           RAM_DO, check_fall: in std_logic;
+	           RAM_DO, check_fall, E_phy: in std_logic;
 	           E_fallCt, posY_E_falling, E_addr_falling: out std_logic;
 	           fall_done, sclrQ: out std_logic;
 	           falling: out std_logic_vector( 1 downto 0 );
@@ -112,6 +112,7 @@ begin
 	fallfsmd: fallFSM port map( clock => clock,
 				                resetn => resetn,
 				                RAM_DO => RAM_DO,
+								E_phy => E_phy,
 				                check_fall => check_fall,
 				                E_fallCt => E_fallCt,
 				                posY_E_falling => posY_E_falling, 

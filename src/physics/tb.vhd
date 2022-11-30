@@ -20,7 +20,8 @@ end component;
    --Inputs
    signal resetn, clock, RAM_DO, ps2_done, E_phy : std_logic := '0';
    signal din : std_logic_vector ( 7 downto 0 ) := (others => '0');
-   signal X_immediate : std_logic_vector ( 9 downto 0 ) := (others => '0');
+   --signal X_immediate : std_logic_vector ( 9 downto 0 ) := (others => '0');
+   signal X_immediate : std_logic_vector ( 9 downto 0 ) := "0000001000"; -- 16
    signal Y_immediate : std_logic_vector ( 9 downto 0 ) := "0111011110"; -- 478
 
    --Outputs
@@ -55,8 +56,14 @@ BEGIN
 
       -- insert stimulus here 
 	  wait for clock_period * 2;
-      E_phy <= '1'; ps2_done <= '1'; din <= x"1C"; wait for clock_period;
-      E_phy <= '0'; ps2_done <= '0'; wait for clock_period;
+	  
+	  -- move left 1
+      RAM_DO <= '1'; E_phy <= '1'; ps2_done <= '1'; din <= x"23"; wait for 2*clock_period; -- move 1 space to the left
+      RAM_DO <= '0'; E_phy <= '1'; ps2_done <= '0'; wait for 2 * clock_period;
+	  
+	  -- move right 1
+      -- RAM_DO <= '1'; E_phy <= '1'; ps2_done <= '1'; din <= x"1C"; wait for 2*clock_period; -- move 1 space to the left
+      -- RAM_DO <= '0'; E_phy <= '1'; ps2_done <= '0'; wait for 2 * clock_period;
 	  
 	
       wait;
