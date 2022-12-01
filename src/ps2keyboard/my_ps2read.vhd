@@ -25,7 +25,7 @@ use ieee.math_real.ceil;
 entity my_ps2read is
 	port (resetn, clock: in std_logic;
 			ps2c, ps2d: in std_logic;
-			DOUT: out std_logic_vector (9 downto 0);
+            DOUT: out std_logic_vector (7 downto 0); -- FIXME: prof had this as a 10 bit signal when he meant 8bit ?
 			done: out std_logic);
 end my_ps2read;
 

@@ -11,13 +11,13 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity sevenseg is
+entity sevSegDecoder is
 	port (input : in std_logic;
 		  sevseg: out std_logic_vector (6 downto 0);
 		  AN: out std_logic_vector(7 downto 0));
-end sevenseg;
+end sevSegDecoder;
 
-architecture structure of sevenseg is
+architecture structure of sevSegDecoder is
 
 	signal leds: std_logic_vector (6 downto 0);
 	--signal enable : std_logic_vector(4 downto 0);
