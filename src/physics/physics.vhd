@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity physics is
-	port ( clock, resetn: in std_logic;
+	port ( clock, resetn, moveLeft, moveRight, moveUp: in std_logic;
 	       canFall, canMoveLeft, canMoveRight, canMoveUp, ps2_done, E_phy: in std_logic;
 	       din: in std_logic_vector( 7 downto 0 );	-- change this if you have bigger scan codes
 	       X_immediate, Y_immediate: in std_logic_vector( 9 downto 0 );
@@ -63,10 +63,9 @@ architecture Behavioral of physics is
 	    port ( clock, resetn: in std_logic;
 	           canMoveUp, canMoveLeft, canMoveRight, ps2_done, fall_done, E_phy: in std_logic;
 	           din: in std_logic_vector( 7 downto 0 );	-- change this if you have bigger scan codes
-	           addr_sel: out std_logic_vector( 1 downto 0 );
-	           E_jumpCt, posY_E_main, posX_E, E_addr_sel, posY_E_sel, E_addr_main : out std_logic;
-	           check_fall: out std_logic;
-	           l_r: out std_logic_vector( 1 downto 0 )
+	           addr_sel, l_r: out std_logic_vector( 1 downto 0 );
+	           E_jumpCt, posY_E_main, posX_E, E_addr_sel, posY_E_sel, E_addr_main,
+    	           check_fall, moveLeft, moveRight, moveUp: out std_logic
           	 );
 	end component;
 
@@ -118,7 +117,10 @@ begin
 				                posY_E_falling => posY_E_falling, 
 				                E_addr_falling => E_addr_falling, 
 				                falling => falling, 
-				                fall_done => fall_done
+				                fall_done => fall_done,
+                                moveLeft => moveLeft,
+                                moveRight => moveRight,
+                                moveUp => moveUp
 			 	              );
 	mainfsmd: mainFSM port map( clock => clock,
 				                resetn => resetn,

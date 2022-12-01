@@ -9,10 +9,9 @@ entity mainFSM is
 	    port ( clock, resetn: in std_logic;
 	           canMoveUp, canMoveLeft, canMoveRight, ps2_done, fall_done, E_phy: in std_logic;
 	           din: in std_logic_vector( 7 downto 0 );	-- change this if you have bigger scan codes
-	           addr_sel: out std_logic_vector( 1 downto 0 );
-	           E_jumpCt, posY_E_main, posX_E, E_addr_sel, posY_E_sel, E_addr_main : out std_logic;
-	           check_fall: out std_logic;
-	           l_r: out std_logic_vector( 1 downto 0 )
+	           addr_sel, l_r: out std_logic_vector( 1 downto 0 );
+	           E_jumpCt, posY_E_main, posX_E, E_addr_sel, posY_E_sel, E_addr_main,
+    	           check_fall, moveLeft, moveRight, moveUp: out std_logic
           	 );
 end mainFSM;
 
@@ -105,7 +104,7 @@ begin
 	    E_addr_sel <= '0'; E_addr_main <= '0'; posY_E_main <= '0'; falling <= '0'; posX_E <= '0'; check_fall <= '0';
 	    posY_E_sel <= '0'; addr_sel <= "00"; l_r <= "00"; jwait_EQ <= '0'; jwait_sclrQ <= '0'; -- Default values
         jumpPx_EQ <= '0'; jumpPx_sclrQ <= '0'; mwait_EQ <= '0'; mwait_sclrQ <= '0';
-        E_jumpCt <= '0';
+        E_jumpCt <= '0'; moveLeft <= '0'; moveRight <= '0'; moveUp <= '0';
         
 		case y is	
 			when S0 => posY_E_main <= '1'; l_r <= "10"; posX_E <= '1';	
@@ -120,15 +119,15 @@ begin
             when S2 => E_addr_sel <= '1'; posY_E_sel <= '1';
 			
 			when S3 => if din = x"23" then
-                                E_addr_main <= '1'; addr_sel <= "00"; 
+                                moveLeft <= '1'; E_addr_main <= '1'; addr_sel <= "00"; 
 		    		            if canMoveLeft = '1' then posX_E <= '1'; end if;
 		    		        end if;
 		    		        if din = x"1C" then
-                                E_addr_main <= '1'; addr_sel <= "01"; l_r <= "01";
+                                moveRight <= '1'; E_addr_main <= '1'; addr_sel <= "01"; l_r <= "01";
 		    		            if canMoveRight = '1' then posX_E <= '1'; end if;
 		    		        end if;
 
-            when S4 => addr_sel <= "10"; E_addr_main <= '1'; 
+            when S4 => moveUp <= '1'; addr_sel <= "10"; E_addr_main <= '1'; 
                        if canMoveUp = '1' then posY_E_main <= '1'; end if;
 
             when S5a => if jwait_zQ = '1' then jwait_EQ <= '1'; jwait_sclrQ <= '1';
