@@ -7,7 +7,7 @@ use ieee.math_real.ceil;
 
 entity mainFSM is
 	    port ( clock, resetn: in std_logic;
-	           RAM_DO, ps2_done, fall_done, E_phy: in std_logic;
+	           canMoveUp, canMoveLeft, canMoveRight, ps2_done, fall_done, E_phy: in std_logic;
 	           din: in std_logic_vector( 7 downto 0 );	-- change this if you have bigger scan codes
 	           addr_sel: out std_logic_vector( 1 downto 0 );
 	           E_jumpCt, posY_E_main, posX_E, E_addr_sel, posY_E_sel, E_addr_main : out std_logic;
@@ -56,7 +56,7 @@ begin
 				       z => mwait_zQ
 				     );
 				     
-	Transitions: process ( resetn, clock, RAM_DO, ps2_done, fall_done, din )
+	Transitions: process ( resetn, clock, canMoveUp, canMoveLeft, canMoveRight, ps2_done, fall_done, din )
 	begin
 		if resetn = '0' then
 			y <= S0;
@@ -64,8 +64,11 @@ begin
 			case y is
 				when S0 => y <= S1;
 				when S1 =>
-				    if  E_phy = '1' and ps2_done <= '1' then
+				    if  E_phy = '1' then
+						if ps2_done = '1' then
 							y <= S2;
+						else y <= S1;
+						end if;
 					else y <= S1;
 				    end if;
 
@@ -74,12 +77,13 @@ begin
 					
 				when S3 =>	
 					if din = x"29" then y <= S4;
-                        elsif ( din = x"23" or din = x"1C" ) and RAM_DO <= '0' then y <= S5b; 
+                        elsif din = x"23" and canMoveLeft = '1' then y <= S5b;
+						elsif din = x"1C" and canMoveRight <= '1' then y <= S5b; 
                         else y <= S1;
                     end if;
 					
 				when S4 =>
-                    if RAM_DO = '0' then y <= S5a; else y <= S1; end if;
+                    if canMoveUp = '1' then y <= S5a; else y <= S1; end if;
 
                 when S5a =>
                     if jwait_zQ = '1' then
@@ -96,7 +100,7 @@ begin
 		
 	end process;
 	
-	Outputs: process ( y, E_phy, RAM_DO, ps2_done, fall_done, din, jwait_zQ, jumpPx_zQ, mwait_zQ )
+	Outputs: process ( y, E_phy, canMoveUp, canMoveLeft, canMoveRight, ps2_done, fall_done, din, jwait_zQ, jumpPx_zQ, mwait_zQ )
 	begin		
 	    E_addr_sel <= '0'; E_addr_main <= '0'; posY_E_main <= '0'; falling <= '0'; posX_E <= '0'; check_fall <= '0';
 	    posY_E_sel <= '0'; addr_sel <= "00"; l_r <= "00"; jwait_EQ <= '0'; jwait_sclrQ <= '0'; -- Default values
@@ -117,17 +121,15 @@ begin
 			
 			when S3 => if din = x"23" then
                                 E_addr_main <= '1'; addr_sel <= "00"; 
-		    		            if RAM_DO = '0' then posX_E <= '1';
-		    		            end if;
+		    		            if canMoveLeft = '1' then posX_E <= '1'; end if;
 		    		        end if;
 		    		        if din = x"1C" then
                                 E_addr_main <= '1'; addr_sel <= "01"; l_r <= "01";
-		    		            if RAM_DO = '0' then posX_E <= '1';
-		    		            end if;
+		    		            if canMoveRight = '1' then posX_E <= '1'; end if;
 		    		        end if;
 
             when S4 => addr_sel <= "10"; E_addr_main <= '1'; 
-                       if RAM_DO = '0' then posY_E_main <= '1'; end if;
+                       if canMoveUp = '1' then posY_E_main <= '1'; end if;
 
             when S5a => if jwait_zQ = '1' then jwait_EQ <= '1'; jwait_sclrQ <= '1';
                              if jumpPx_zQ = '1' then E_jumpCt <= '1'; jumpPx_EQ <= '1'; jumpPX_sclrQ <= '1';

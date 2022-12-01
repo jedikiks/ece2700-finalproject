@@ -4,13 +4,13 @@ use ieee.numeric_std.all;
 
 entity physics is
 	port ( clock, resetn: in std_logic;
-	       RAM_DO, ps2_done, E_phy: in std_logic;
+	       canFall, canMoveLeft, canMoveRight, canMoveUp, ps2_done, E_phy: in std_logic;
 	       din: in std_logic_vector( 7 downto 0 );	-- change this if you have bigger scan codes
 	       X_immediate, Y_immediate: in std_logic_vector( 9 downto 0 );
 	       E_fallCt: out std_logic;
 	       posX, posY: out std_logic_vector( 9 downto 0 );
 	       addr: out std_logic_vector( 19 downto 0 ) -- change this if address width is different
-      	     );
+      	 );
 end physics;
 
 architecture Behavioral of physics is
@@ -51,7 +51,7 @@ architecture Behavioral of physics is
 
 	component fallFSM
 	    port ( clock, resetn: in std_logic;
-	           RAM_DO, check_fall, E_phy: in std_logic;
+	           canFall, check_fall, E_phy: in std_logic;
 	           E_fallCt, posY_E_falling, E_addr_falling: out std_logic;
 	           fall_done, sclrQ: out std_logic;
 	           falling: out std_logic_vector( 1 downto 0 );
@@ -61,7 +61,7 @@ architecture Behavioral of physics is
 
 	component mainFSM
 	    port ( clock, resetn: in std_logic;
-	           RAM_DO, ps2_done, fall_done, E_phy: in std_logic;
+	           canMoveUp, canMoveLeft, canMoveRight, ps2_done, fall_done, E_phy: in std_logic;
 	           din: in std_logic_vector( 7 downto 0 );	-- change this if you have bigger scan codes
 	           addr_sel: out std_logic_vector( 1 downto 0 );
 	           E_jumpCt, posY_E_main, posX_E, E_addr_sel, posY_E_sel, E_addr_main : out std_logic;
@@ -111,7 +111,7 @@ begin
 	-- Two FSMs --
 	fallfsmd: fallFSM port map( clock => clock,
 				                resetn => resetn,
-				                RAM_DO => RAM_DO,
+				                canFall => canFall,
 								E_phy => E_phy,
 				                check_fall => check_fall,
 				                E_fallCt => E_fallCt,
@@ -123,7 +123,9 @@ begin
 	mainfsmd: mainFSM port map( clock => clock,
 				                resetn => resetn,
 				                check_fall => check_fall,
-				                ram_do => ram_do,
+				                canMoveLeft => canMoveLeft,
+				                canMoveRight => canMoveRight,
+								canMoveUp => canMoveUp,
 				                din => din,
 				                ps2_done => ps2_done,
 				                E_jumpct => E_jumpct,
