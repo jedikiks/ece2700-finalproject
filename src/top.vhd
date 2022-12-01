@@ -1,6 +1,11 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use IEEE.STD_LOGIC_1164.ALL;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
+use ieee.math_real.log2;
+use ieee.math_real.ceil;
 
 entity top is
     Port ( clock, resetn, ps2c, ps2d: in std_logic;
@@ -12,6 +17,10 @@ entity top is
 end top;
 
 architecture Behavioral of top is
+    signal pause, E_phy, moveLeft, moveRight, jump, canFall, canMoveLeft, canMoveRight, canMoveUp,  ps2_done,  E_fallCt, E_jumpCt : std_logic;
+    signal dout, din: std_logic_vector( 7 downto 0 );
+    signal posX, posY, X_immediate, Y_immediate: std_logic_vector( 9 downto 0 );
+
     component VGA_Controller
        Port ( CLK, RESET : in STD_LOGIC; -- CLK is a 50.35MHz clock signal
               --RGB_IN : in STD_LOGIC_VECTOR (2 downto 0);
@@ -53,21 +62,37 @@ architecture Behavioral of top is
 	           canFall, canMoveLeft, canMoveRight, canMoveUp, ps2_done, E_phy: in std_logic;
 	           din: in std_logic_vector( 7 downto 0 );	-- change this if you have bigger scan codes
 	           X_immediate, Y_immediate: in std_logic_vector( 9 downto 0 );
-	           E_fallCt: out std_logic;
+	           E_jumpCt, E_fallCt, moveLeft, moveRight, moveUp: out std_logic;
 	           posX, posY: out std_logic_vector( 9 downto 0 );
 	           addr: out std_logic_vector( 19 downto 0 ) -- change this if address width is different
           	 );
     end component;
 
-    component my_ps2read is
+    component my_ps2keyboard is
 	    port (resetn, clock: in std_logic;
 	    		ps2c, ps2d: in std_logic;
-                DOUT: out std_logic_vector (7 downto 0); -- FIXME: prof had this as a 10 bit signal when he meant 8bit ?
+                DOUT: out std_logic_vector (7 downto 0);
 	    		done: out std_logic);
     end component;
 
+    component my_genpulse_sclr
+    	--generic (COUNT: INTEGER:= (10**8)/2); -- (10**8)/2 cycles of T = 10 ns --> 0.5 s
+    	generic (COUNT: INTEGER:= (10**2)/2); -- (10**2)/2 cycles of T = 10 ns --> 0.5us
+    	port (clock, resetn, E, sclr: in std_logic;
+    			Q: out std_logic_vector ( integer(ceil(log2(real(COUNT)))) - 1 downto 0);
+    			z: out std_logic);
+    end component;
+
+
 begin
 
+    gfsm: GameFSM port map( clock => clock,
+                            resetn => resetn,
+                            pause => pause,
+                            isPaused => E_phy,
+                            segs => sevseg,
+                            en => AN
+                          );
     vgaCtrl: VGA_Controller port map( CLK => clock,
                                       RESET => resetn,
                                       TEST => ( others => '0' ), --FIXME: what should this be ? 
@@ -78,14 +103,57 @@ begin
     mymap: mapping generic map( N => 80 )
                    port map( clock => clock,
                              resetn => resetn,
-                             EN => , --FIXME: what is this
+                             EN => '0',
                              nextMap => nextMap,
                              prevMap => prevMap,
-                             moveLeft => canMoveLeft,
-                             moveRight => canMoveRight,
-                             jump => canMoveUp,
-
-
-
-
+                             moveLeft => moveLeft,
+                             moveRight => moveRight,
+                             jump => jump,
+                             newMap => newMap,
+                             currentX => to_integer( unsigned( posX ) ) ,
+                             currentY => to_integer( unsigned( posY ) ) ,
+                             canFall => canFall,
+                             canMoveLeft => canMoveLeft,
+                             canMoveRight => canMoveRight,
+                             canMoveUp => canMoveUp
+                           );
+    phy: physics port map( clock => clock,
+                           resetn => resetn,
+                           ps2_done => ps2_done,
+                           E_phy => E_phy,
+                           din => din,
+                           X_immediate => X_immediate,
+                           Y_immediate => Y_immediate,
+                           E_fallCt => E_fallCt,
+                           E_jumpCt => E_jumpCt,
+                           moveLeft => moveLeft,
+                           moveRight => moveRight,
+                           moveUp => jump,
+                           posX => posX,
+                           posY => posY,
+                           canFall => canFall,
+                           canMoveLeft => canMoveLeft,
+                           canMoveRight => canMoveRight,
+                           canMoveUp => canMoveUp
+                         );
+    ps2: my_ps2keyboard port map( clock => clock,
+                              resetn => resetn,
+                              ps2c => ps2c,
+                              ps2d => ps2d,
+                              DOUT => dout,
+                              done => ps2_done
+                            );
+	jc: my_genpulse_sclr generic map( COUNT => 100 )
+		     	         port map( clock => clock,
+				                   resetn => resetn,
+				                   E => E_fallCt,
+				                   sclr => '0',
+				                 );
+	fc: my_genpulse_sclr generic map( COUNT => 100 )
+		     	         port map( clock => clock,
+				                   resetn => resetn,
+				                   E => E_jumpCt,
+				                   sclr => '0',
+				                 );
+ 
 end;

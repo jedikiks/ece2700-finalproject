@@ -7,14 +7,14 @@ entity physics is
 	       canFall, canMoveLeft, canMoveRight, canMoveUp, ps2_done, E_phy: in std_logic;
 	       din: in std_logic_vector( 7 downto 0 );	-- change this if you have bigger scan codes
 	       X_immediate, Y_immediate: in std_logic_vector( 9 downto 0 );
-	       E_fallCt, moveLeft, moveRight, moveUp: out std_logic;
+	       E_jumpCt, E_fallCt, moveLeft, moveRight, moveUp: out std_logic;
 	       posX, posY: out std_logic_vector( 9 downto 0 );
 	       addr: out std_logic_vector( 19 downto 0 ) -- change this if address width is different
       	 );
 end physics;
 
 architecture Behavioral of physics is
-	signal e_jumpct, fall_done, check_fall, posX_E, posY_E, posY_E_falling, posY_E_main, posY_E_sel, E_addr_sel,
+	signal fall_done, check_fall, posX_E, posY_E, posY_E_falling, posY_E_main, posY_E_sel, E_addr_sel,
 	       E_addr_falling,  E_addr_main: std_logic;
 	signal addr_sel: std_logic_vector( 1 downto 0 );
 	signal l_r, falling : std_logic_vector( 1 downto 0 );
