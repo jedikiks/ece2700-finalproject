@@ -3,11 +3,11 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity physics is
-	port ( clock, resetn, moveLeft, moveRight, moveUp: in std_logic;
+	port ( clock, resetn: in std_logic;
 	       canFall, canMoveLeft, canMoveRight, canMoveUp, ps2_done, E_phy: in std_logic;
 	       din: in std_logic_vector( 7 downto 0 );	-- change this if you have bigger scan codes
 	       X_immediate, Y_immediate: in std_logic_vector( 9 downto 0 );
-	       E_fallCt: out std_logic;
+	       E_fallCt, moveLeft, moveRight, moveUp: out std_logic;
 	       posX, posY: out std_logic_vector( 9 downto 0 );
 	       addr: out std_logic_vector( 19 downto 0 ) -- change this if address width is different
       	 );
@@ -64,8 +64,7 @@ architecture Behavioral of physics is
 	           canMoveUp, canMoveLeft, canMoveRight, ps2_done, fall_done, E_phy: in std_logic;
 	           din: in std_logic_vector( 7 downto 0 );	-- change this if you have bigger scan codes
 	           addr_sel, l_r: out std_logic_vector( 1 downto 0 );
-	           E_jumpCt, posY_E_main, posX_E, E_addr_sel, posY_E_sel, E_addr_main,
-    	           check_fall, moveLeft, moveRight, moveUp: out std_logic
+	           E_jumpCt, posY_E_main, posX_E, E_addr_sel, posY_E_sel, E_addr_main, check_fall, moveLeft, moveRight, moveUp: out std_logic
           	 );
 	end component;
 
@@ -117,10 +116,7 @@ begin
 				                posY_E_falling => posY_E_falling, 
 				                E_addr_falling => E_addr_falling, 
 				                falling => falling, 
-				                fall_done => fall_done,
-                                moveLeft => moveLeft,
-                                moveRight => moveRight,
-                                moveUp => moveUp
+				                fall_done => fall_done
 			 	              );
 	mainfsmd: mainFSM port map( clock => clock,
 				                resetn => resetn,
@@ -139,6 +135,9 @@ begin
 				                E_addr_main => E_addr_main, 
 				                fall_done => fall_done, 
 				                addr_sel => addr_sel, 
-				                l_r => l_r 
+				                l_r => l_r,
+				                moveLeft => moveLeft,
+                                moveRight => moveRight,
+                                moveUp => moveUp
 			 	              );
 end;
